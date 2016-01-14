@@ -18,6 +18,7 @@
 #define SWIFT_AST_CONCRETEDECLREF_H
 
 #include "swift/Basic/LLVM.h"
+#include "swift/Basic/UnsafePointerLikeTypeTraits.h"
 #include "swift/AST/Substitution.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/PointerUnion.h"
@@ -133,7 +134,7 @@ namespace llvm {
     typedef llvm::PointerUnion<swift::ValueDecl *,
                                swift::ConcreteDeclRef::SpecializedDeclRef *>
       DataPointer;
-    typedef PointerLikeTypeTraits<DataPointer> DataTraits;
+    typedef swift::UnsafePointerLikeTypeTraits<DataPointer> DataTraits;
 
   public:
     static inline void *
