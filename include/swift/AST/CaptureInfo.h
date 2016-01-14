@@ -34,9 +34,9 @@ class FuncDecl;
 /// CapturedValue includes both the declaration being captured, along with flags
 /// that indicate how it is captured.
 class CapturedValue {
-  llvm::PointerIntPair<ValueDecl*, 2, unsigned> Value;
+  llvm::PointerIntPair<void *, 2, unsigned> Value;
 
-  explicit CapturedValue(llvm::PointerIntPair<ValueDecl*, 2, unsigned> V) : Value(V) {}
+  explicit CapturedValue(llvm::PointerIntPair<void*, 2, unsigned> V) : Value(V) {}
 
 public:
   friend struct llvm::DenseMapInfo<CapturedValue>;
@@ -57,7 +57,9 @@ public:
   bool isDirect() const { return Value.getInt() & IsDirect; }
   bool isNoEscape() const { return Value.getInt() & IsNoEscape; }
 
-  ValueDecl *getDecl() const { return Value.getPointer(); }
+  ValueDecl *getDecl() const {
+    return static_cast<ValueDecl *>(Value.getPointer());
+  }
 
   unsigned getFlags() const { return Value.getInt(); }
 
@@ -82,7 +84,7 @@ template <> struct DenseMapInfo<swift::CapturedValue> {
   using CapturedValue = swift::CapturedValue;
 
   using PtrIntPairDenseMapInfo =
-      DenseMapInfo<llvm::PointerIntPair<swift::ValueDecl *, 2, unsigned>>;
+      DenseMapInfo<llvm::PointerIntPair<void *, 2, unsigned>>;
 
   static inline swift::CapturedValue getEmptyKey() {
     return CapturedValue{PtrIntPairDenseMapInfo::getEmptyKey()};
