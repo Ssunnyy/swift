@@ -1292,7 +1292,9 @@ public:
 
     SILValue superMethod;
     auto *funcDecl = cast<AbstractFunctionDecl>(constant.getDecl());
-    if (constant.isForeign || !funcDecl->isFinal()) {
+    auto thisModule = SGF.SGM.M.getSwiftModule();
+    auto inThisModule = thisModule == funcDecl->getModuleContext();
+    if (constant.isForeign || !(funcDecl->isFinal() || inThisModule)) {
       // All Objective-C methods and
       // non-final native Swift methods use dynamic dispatch.
       SILValue Input = super.getValue();
@@ -3784,7 +3786,9 @@ static Callee getBaseAccessorFunctionRef(SILGenFunction &gen,
   while (auto *upcast = dyn_cast<UpcastInst>(self))
     self = upcast->getOperand();
 
-  if (constant.isForeign || !decl->isFinal())
+  auto thisModule = gen.SGM.M.getSwiftModule();
+  auto inThisModule = thisModule == decl->getModuleContext();
+  if (constant.isForeign || !(decl->isFinal() || inThisModule))
     return Callee::forSuperMethod(gen, self, constant, substAccessorType,loc);
 
   return Callee::forDirect(gen, constant, substAccessorType, loc);
